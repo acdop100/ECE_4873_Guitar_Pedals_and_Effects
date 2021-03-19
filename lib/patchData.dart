@@ -14,11 +14,13 @@ class Effect {
   int id;
   String name;
   int enabled = 0;
+  double effectValue;
 
   Effect({
     this.id,
     this.name,
     this.enabled = 0,
+    this.effectValue = 0.0
   });
 
   // Convert an effect into a Map. The keys must correspond to the names of the
@@ -28,6 +30,7 @@ class Effect {
       'id': id,
       'name': name,
       'enabled': enabled,
+      'effectValue': effectValue,
     };
   }
 }

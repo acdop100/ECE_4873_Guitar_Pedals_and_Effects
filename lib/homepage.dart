@@ -1,36 +1,29 @@
 import 'package:flutter/material.dart';
 import 'patchData.dart';
+import 'package:flutter_knob/flutter_knob.dart';
 
-class ListViewCard extends StatefulWidget {
-  final int index;
-  final Key key;
-  final List<Effect> listItems;
-
-  ListViewCard(this.listItems, this.index, this.key);
-
-  @override
-  _ListViewCard createState() => _ListViewCard();
-}
+List<Effect> effects = [flangerEff, delayEff, distortionEff];
 
 Effect flangerEff = Effect(
     id: 0,
     name: 'Flanger',
-    enabled: 0
+    enabled: 0,
+    effectValue: 0.0
 );
 
 Effect delayEff = Effect(
     id: 1,
     name: 'Delay',
-    enabled: 0
+    enabled: 0,
+    effectValue: 0.0
 );
 
 Effect distortionEff = Effect(
     id: 2,
     name: 'Distortion',
-    enabled: 0
+    enabled: 0,
+    effectValue: 0.0
 );
-
-List<Effect> effects = [flangerEff, delayEff, distortionEff];
 
 TextEditingController _effectName = TextEditingController();
 String codeDialog;
@@ -43,32 +36,63 @@ findNewPatchID()
   return 1;
 }
 
-// For changing effect settings
-_effectSettings(BuildContext context) {
-  showDialog(
-      context: context,
-      builder: (_) => new AlertDialog(
-        title: new Text("Effect Settings"),
-        content: new Text("Placeholder text"),
-        actions: <Widget>[
-          FlatButton(
-            color: Colors.red,
-            textColor: Colors.white,
-            child: Text('Cancel'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          FlatButton(
-            color: Colors.green,
-            textColor: Colors.white,
-            child: Text('Save'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ));
+// Show effect parameters that can be changed
+class EffectSettings extends StatefulWidget {
+  final String recordObject;
+  double value = 0.0;
+  EffectSettings(this.recordObject, this.value);
+
+  @override
+  _EffectSettings createState() => new _EffectSettings();
+}
+
+class _EffectSettings extends State<EffectSettings> {
+
+  static const double minValue = 0;
+  static const double maxValue = 10;
+
+  void _setValue(double value) => setState(() => widget.value = value);
+
+  @override
+  Widget build(BuildContext context) {
+    // New window
+    return AlertDialog(
+      title: new Text('${widget.recordObject} Settings'),
+      content: new Text(
+        '${widget.recordObject} Power: ${widget.value.toStringAsFixed(1)}',
+      ),
+      actions: <Widget>[
+        // Effect intensity value
+        Slider(
+            value: widget.value,
+            onChanged: _setValue,
+            min: minValue,
+            max: maxValue
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Save'),
+              onPressed: () {
+                Navigator.pop(context, widget.value);
+              },
+            ),
+          ],
+        )
+      ],
+    );
+  }
 }
 
 // For saving effect patches
@@ -79,7 +103,6 @@ _saveEffect(BuildContext context) {
         title: new Text("Save Effect"),
         content: TextField(
           onChanged: (value) {
-
           },
           controller: _effectName,
           decoration: InputDecoration(hintText: "Name of patch"),
@@ -111,6 +134,17 @@ _saveEffect(BuildContext context) {
       ));
 }
 
+class ListViewCard extends StatefulWidget {
+  final int index;
+  final Key key;
+  final List<Effect> listItems;
+
+  ListViewCard(this.listItems, this.index, this.key);
+
+  @override
+  _ListViewCard createState() => _ListViewCard();
+}
+
 // Builds the effect rows
 class _ListViewCard extends State<ListViewCard> {
   @override
@@ -126,7 +160,17 @@ class _ListViewCard extends State<ListViewCard> {
             new GestureDetector(
               onTap: () {
                 // Bring up settings page for that effect
-                _effectSettings(context);
+                showDialog(
+                    context: context,
+                    builder: (_) {
+                      return EffectSettings(widget.listItems[widget.index].name, widget.listItems[widget.index].effectValue);
+                    }).then((value) {
+                      if (value != null)
+                        {
+                          widget.listItems[widget.index].effectValue = value;
+                        }
+                    }
+                );
               },
               child: new Container(
                   margin: const EdgeInsets.all(10.0),
