@@ -3,13 +3,13 @@ import 'package:flutter/widgets.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'homepage.dart';
-import 'settings.dart';
+//import 'settings.dart';
 import 'saved.dart';
+import 'BluetoothPage.dart';
 
 Future<Database> database;
 
 void main() async {
-
   // Avoid errors caused by flutter upgrade.
   // Importing 'package:flutter/widgets.dart' is required.
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
   final List<Widget> _children = [
     HomePage(),
     SavedPage(),
-    Settings(),
+    MainPage(),
   ];
 
   // Changes pages from bottom nav bar
