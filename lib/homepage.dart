@@ -1,29 +1,15 @@
 import 'package:flutter/material.dart';
 import 'patchData.dart';
-import 'package:flutter_knob/flutter_knob.dart';
 
 List<Effect> effects = [flangerEff, delayEff, distortionEff];
 
-Effect flangerEff = Effect(
-    id: 0,
-    name: 'Flanger',
-    enabled: 0,
-    effectValue: 0.0
-);
+Effect flangerEff =
+    Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 0.0);
 
-Effect delayEff = Effect(
-    id: 1,
-    name: 'Delay',
-    enabled: 0,
-    effectValue: 0.0
-);
+Effect delayEff = Effect(id: 1, name: 'Delay', enabled: 0, effectValue: 0.0);
 
-Effect distortionEff = Effect(
-    id: 2,
-    name: 'Distortion',
-    enabled: 0,
-    effectValue: 0.0
-);
+Effect distortionEff =
+    Effect(id: 2, name: 'Distortion', enabled: 0, effectValue: 0.0);
 
 TextEditingController _effectName = TextEditingController();
 String codeDialog;
@@ -31,8 +17,7 @@ String valueText;
 
 // Assign the patch the next unused ID
 // (NOT IMPLEMENTED YET)
-findNewPatchID()
-{
+findNewPatchID() {
   return 1;
 }
 
@@ -47,7 +32,6 @@ class EffectSettings extends StatefulWidget {
 }
 
 class _EffectSettings extends State<EffectSettings> {
-
   static const double minValue = 0;
   static const double maxValue = 10;
 
@@ -67,8 +51,7 @@ class _EffectSettings extends State<EffectSettings> {
             value: widget.value,
             onChanged: _setValue,
             min: minValue,
-            max: maxValue
-        ),
+            max: maxValue),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -100,38 +83,36 @@ _saveEffect(BuildContext context) {
   showDialog(
       context: context,
       builder: (_) => new AlertDialog(
-        title: new Text("Save Effect"),
-        content: TextField(
-          onChanged: (value) {
-          },
-          controller: _effectName,
-          decoration: InputDecoration(hintText: "Name of patch"),
-        ),
-        actions: <Widget>[
-          FlatButton(
-            color: Colors.red,
-            textColor: Colors.white,
-            child: Text('Cancel'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          FlatButton(
-            color: Colors.green,
-            textColor: Colors.white,
-            child: Text('Save'),
-            onPressed: () {
-              Patch patchToSave = new Patch(
-                  id: findNewPatchID(),
-                  name: _effectName.value.toString(),
-                  effects: effects
-              );
-              insertPatch(patchToSave);
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ));
+            title: new Text("Save Effect"),
+            content: TextField(
+              onChanged: (value) {},
+              controller: _effectName,
+              decoration: InputDecoration(hintText: "Name of patch"),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.red,
+                textColor: Colors.white,
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                child: Text('Save'),
+                onPressed: () {
+                  Patch patchToSave = new Patch(
+                      id: findNewPatchID(),
+                      name: _effectName.value.toString(),
+                      effects: effects);
+                  insertPatch(patchToSave);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ));
 }
 
 class ListViewCard extends StatefulWidget {
@@ -163,22 +144,22 @@ class _ListViewCard extends State<ListViewCard> {
                 showDialog(
                     context: context,
                     builder: (_) {
-                      return EffectSettings(widget.listItems[widget.index].name, widget.listItems[widget.index].effectValue);
+                      return EffectSettings(widget.listItems[widget.index].name,
+                          widget.listItems[widget.index].effectValue);
                     }).then((value) {
-                      if (value != null)
-                        {
-                          widget.listItems[widget.index].effectValue = value;
-                        }
-                    }
-                );
+                  if (value != null) {
+                    widget.listItems[widget.index].effectValue = value;
+                  }
+                });
               },
               child: new Container(
-                  margin: const EdgeInsets.all(10.0),
+                margin: const EdgeInsets.all(10.0),
                 child: Icon(
                   Icons.more_vert,
                   color: Colors.grey,
                   size: 24.0,
-                ),),
+                ),
+              ),
             ),
             // Title and subtitles (same for now)
             Flexible(
@@ -191,7 +172,7 @@ class _ListViewCard extends State<ListViewCard> {
                     child: Text(
                       '${widget.listItems[widget.index].name}',
                       style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       textAlign: TextAlign.left,
                       maxLines: 5,
                     ),
@@ -214,12 +195,9 @@ class _ListViewCard extends State<ListViewCard> {
             new GestureDetector(
               onTap: () {
                 setState(() {
-                  if (widget.listItems[widget.index].enabled == 1)
-                  {
+                  if (widget.listItems[widget.index].enabled == 1) {
                     widget.listItems[widget.index].enabled = 0;
-                  }
-                  else
-                  {
+                  } else {
                     widget.listItems[widget.index].enabled = 1;
                   }
                 });
@@ -261,22 +239,22 @@ class _HomePage extends State<HomePage> {
     super.initState();
   }
 
-    // Function to let user re-order the enabled effects to get new sounds
-    void _onReorder(int oldIndex, int newIndex) {
-      setState(
-            () {
-          if (newIndex > oldIndex) {
-            newIndex -= 1;
-          }
-          final Effect item = effects.removeAt(oldIndex);
-          effects.insert(newIndex, item);
-        },
-      );
-    }
+  // Function to let user re-order the enabled effects to get new sounds
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(
+      () {
+        if (newIndex > oldIndex) {
+          newIndex -= 1;
+        }
+        final Effect item = effects.removeAt(oldIndex);
+        effects.insert(newIndex, item);
+      },
+    );
+  }
 
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
         appBar: AppBar(
           title: Text(
             "Pedal Effects",
@@ -297,7 +275,8 @@ class _HomePage extends State<HomePage> {
                     Icons.save,
                     color: Colors.white,
                     size: 24.0,
-                  ),),
+                  ),
+                ),
               ),
             )
           ],
@@ -309,7 +288,7 @@ class _HomePage extends State<HomePage> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: List.generate(
             effects.length,
-                (index) {
+            (index) {
               return ListViewCard(
                 effects,
                 index,
@@ -317,7 +296,6 @@ class _HomePage extends State<HomePage> {
               );
             },
           ),
-        )
-      );
-    }
+        ));
   }
+}
