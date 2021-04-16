@@ -107,7 +107,7 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<BluetoothDeviceListEntry> list = devices
+    List<BluetoothDeviceListEntry> deviceList = devices
         .map((_device) => BluetoothDeviceListEntry(
               device: _device.device,
               rssi: _device.rssi,
@@ -138,7 +138,7 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
                 )
         ],
       ),
-      body: ListView(children: list),
+      body: ListView(children: deviceList),
     );
   }
 }

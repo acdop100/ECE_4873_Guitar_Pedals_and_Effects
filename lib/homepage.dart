@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'patchData.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
-List<Effect> effects = [flangerEff, delayEff, distortionEff];
+List<Effect> effects = [flangerEff, distortionEff, reverbEff];
 
-Effect flangerEff =
-    Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 0.0);
+Effect flangerEff = Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 0.0);
 
-Effect delayEff = Effect(id: 1, name: 'Delay', enabled: 0, effectValue: 0.0);
+Effect distortionEff = Effect(id: 1, name: 'Distortion', enabled: 0, effectValue: 0.0);
 
-Effect distortionEff =
-    Effect(id: 2, name: 'Distortion', enabled: 0, effectValue: 0.0);
+Effect reverbEff = Effect(id: 2, name: 'reverb', enabled: 0, effectValue: 0.0);
 
 TextEditingController _effectName = TextEditingController();
 String codeDialog;
@@ -120,15 +121,84 @@ class ListViewCard extends StatefulWidget {
   final Key key;
   final List<Effect> listItems;
 
+
   ListViewCard(this.listItems, this.index, this.key);
 
   @override
   _ListViewCard createState() => _ListViewCard();
+
+}
+
+class _Message {
+  int whom;
+  String text;
+
+  _Message(this.whom, this.text);
 }
 
 // Builds the effect rows
 class _ListViewCard extends State<ListViewCard> {
+  List<BluetoothDevice> devices;
+  BluetoothDevice pedalBoard;
+  BluetoothConnection connection;
+  bool isConnecting = true;
+  bool get isConnected => connection != null && connection.isConnected;
+  bool isDisconnecting = false;
+
+  List<_Message> messages = List<_Message>();
+  String _messageBuffer = '';
+
   @override
+  void initState() {
+    super.initState();
+
+    FlutterBluetoothSerial.instance
+        .getBondedDevices().then((List<BluetoothDevice> bondedDevices) {
+      setState(() {
+        devices = bondedDevices;
+      });
+      for (var i = 0; i < devices.length; i++)
+      {
+        if (devices[i].name == "HC-06")
+        {
+          pedalBoard = devices[i];
+
+          /*BluetoothConnection.toAddress(devices[i].address).then((_connection) {
+            print('Connected to the device');
+            connection = _connection;
+            setState(() {
+              isConnecting = false;
+              isDisconnecting = false;
+            });
+
+            connection.input.listen(_onDataReceived).onDone(() {
+              // Example: Detect which side closed the connection
+              // There should be `isDisconnecting` flag to show are we are (locally)
+              // in middle of disconnecting process, should be set before calling
+              // `dispose`, `finish` or `close`, which all causes to disconnect.
+              // If we except the disconnection, `onDone` should be fired as result.
+              // If we didn't except this (no flag set), it means closing by remote.
+              if (isDisconnecting) {
+                print('Disconnecting locally!');
+              } else {
+                print('Disconnected remotely!');
+              }
+              if (this.mounted) {
+                setState(() {});
+              }
+            });
+          }).catchError((error) {
+            print('Cannot connect, exception occurred');
+            print(error);
+          });*/
+        }
+        else {
+          print('HC-06 not in bonded devices!!!');
+        }
+      }
+    });
+  }
+
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.all(4),
@@ -149,6 +219,10 @@ class _ListViewCard extends State<ListViewCard> {
                     }).then((value) {
                   if (value != null) {
                     widget.listItems[widget.index].effectValue = value;
+                    _sendMessage('3');
+                    _sendMessage(widget.index.toString());
+                    // TO-DO: Manage different parameters for each effect
+                    _sendMessage('1');
                   }
                 });
               },
@@ -197,6 +271,8 @@ class _ListViewCard extends State<ListViewCard> {
                 setState(() {
                   if (widget.listItems[widget.index].enabled == 1) {
                     widget.listItems[widget.index].enabled = 0;
+                    _sendMessage('1');
+                    _sendMessage(widget.index.toString());
                   } else {
                     widget.listItems[widget.index].enabled = 1;
                   }
@@ -225,6 +301,69 @@ class _ListViewCard extends State<ListViewCard> {
         ),
       ),
     );
+  }
+
+  void _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0) {
+      try {
+        connection.output.add(utf8.encode(text));
+        await connection.output.allSent;
+      } catch (e) {
+        // Ignore error, but notify state
+        setState(() {});
+      }
+    }
+  }
+
+  void _onDataReceived(Uint8List data) {
+    // Allocate buffer for parsed data
+    int backspacesCounter = 0;
+    data.forEach((byte) {
+      if (byte == 8 || byte == 127) {
+        backspacesCounter++;
+      }
+    });
+    Uint8List buffer = Uint8List(data.length - backspacesCounter);
+    int bufferIndex = buffer.length;
+
+    // Apply backspace control character
+    backspacesCounter = 0;
+    for (int i = data.length - 1; i >= 0; i--) {
+      if (data[i] == 8 || data[i] == 127) {
+        backspacesCounter++;
+      } else {
+        if (backspacesCounter > 0) {
+          backspacesCounter--;
+        } else {
+          buffer[--bufferIndex] = data[i];
+        }
+      }
+    }
+
+    // Create message if there is new line character
+    String dataString = String.fromCharCodes(buffer);
+    int index = buffer.indexOf(13);
+    if (~index != 0) {
+      setState(() {
+        messages.add(
+          _Message(
+            1,
+            backspacesCounter > 0
+                ? _messageBuffer.substring(
+                0, _messageBuffer.length - backspacesCounter)
+                : _messageBuffer + dataString.substring(0, index),
+          ),
+        );
+        _messageBuffer = dataString.substring(index);
+      });
+    } else {
+      _messageBuffer = (backspacesCounter > 0
+          ? _messageBuffer.substring(
+          0, _messageBuffer.length - backspacesCounter)
+          : _messageBuffer + dataString);
+    }
   }
 }
 
