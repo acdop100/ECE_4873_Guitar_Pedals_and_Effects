@@ -228,7 +228,9 @@ class _ChatPage extends State<ChatPage> {
               duration: Duration(milliseconds: 333),
               curve: Curves.easeOut);
         });
+        print("Message sent");
       } catch (e) {
+        print("Message send FAILED");
         // Ignore error, but notify state
         setState(() {});
       }

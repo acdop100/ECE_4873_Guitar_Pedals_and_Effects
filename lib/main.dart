@@ -4,8 +4,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'homepage.dart';
 //import 'settings.dart';
-import 'saved.dart';
-import 'BluetoothPage.dart';
+//import 'saved.dart';
+//import 'BluetoothPage.dart';
 
 Future<Database> database;
 
@@ -57,8 +57,8 @@ class _HomeState extends State<Home> {
   // The widget builders for each page
   final List<Widget> _children = [
     HomePage(),
-    SavedPage(),
-    MainPage(),
+    //SavedPage(),
+    //BluetoothPage(),
   ];
 
   // Changes pages from bottom nav bar
@@ -81,10 +81,10 @@ class _HomeState extends State<Home> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          /*BottomNavigationBarItem(
             icon: Icon(Icons.library_books_rounded),
             label: 'Saved',
-          ),
+          ),*/
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',

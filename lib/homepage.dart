@@ -4,6 +4,8 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
+BluetoothConnection connection;
+
 List<Effect> effects = [flangerEff, distortionEff, reverbEff];
 
 Effect flangerEff = Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 0.0);
@@ -121,7 +123,6 @@ class ListViewCard extends StatefulWidget {
   final Key key;
   final List<Effect> listItems;
 
-
   ListViewCard(this.listItems, this.index, this.key);
 
   @override
@@ -138,65 +139,11 @@ class _Message {
 
 // Builds the effect rows
 class _ListViewCard extends State<ListViewCard> {
-  List<BluetoothDevice> devices;
-  BluetoothDevice pedalBoard;
-  BluetoothConnection connection;
-  bool isConnecting = true;
-  bool get isConnected => connection != null && connection.isConnected;
-  bool isDisconnecting = false;
-
   List<_Message> messages = List<_Message>();
   String _messageBuffer = '';
-
   @override
   void initState() {
     super.initState();
-
-    FlutterBluetoothSerial.instance
-        .getBondedDevices().then((List<BluetoothDevice> bondedDevices) {
-      setState(() {
-        devices = bondedDevices;
-      });
-      for (var i = 0; i < devices.length; i++)
-      {
-        if (devices[i].name == "HC-06")
-        {
-          pedalBoard = devices[i];
-
-          /*BluetoothConnection.toAddress(devices[i].address).then((_connection) {
-            print('Connected to the device');
-            connection = _connection;
-            setState(() {
-              isConnecting = false;
-              isDisconnecting = false;
-            });
-
-            connection.input.listen(_onDataReceived).onDone(() {
-              // Example: Detect which side closed the connection
-              // There should be `isDisconnecting` flag to show are we are (locally)
-              // in middle of disconnecting process, should be set before calling
-              // `dispose`, `finish` or `close`, which all causes to disconnect.
-              // If we except the disconnection, `onDone` should be fired as result.
-              // If we didn't except this (no flag set), it means closing by remote.
-              if (isDisconnecting) {
-                print('Disconnecting locally!');
-              } else {
-                print('Disconnected remotely!');
-              }
-              if (this.mounted) {
-                setState(() {});
-              }
-            });
-          }).catchError((error) {
-            print('Cannot connect, exception occurred');
-            print(error);
-          });*/
-        }
-        else {
-          print('HC-06 not in bonded devices!!!');
-        }
-      }
-    });
   }
 
   Widget build(BuildContext context) {
@@ -275,6 +222,8 @@ class _ListViewCard extends State<ListViewCard> {
                     _sendMessage(widget.index.toString());
                   } else {
                     widget.listItems[widget.index].enabled = 1;
+                    _sendMessage('1');
+                    _sendMessage(widget.index.toString());
                   }
                 });
               },
@@ -289,14 +238,14 @@ class _ListViewCard extends State<ListViewCard> {
                   )),
             ),
             // Users press this to re-order items
-            Padding(
+            /*Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
               child: Icon(
                 Icons.reorder,
                 color: Colors.grey,
                 size: 24.0,
               ),
-            ),
+            ),*/
           ],
         ),
       ),
@@ -310,61 +259,15 @@ class _ListViewCard extends State<ListViewCard> {
       try {
         connection.output.add(utf8.encode(text));
         await connection.output.allSent;
+        print("Message sent");
       } catch (e) {
+        print("Message send FAILED");
         // Ignore error, but notify state
         setState(() {});
       }
     }
   }
 
-  void _onDataReceived(Uint8List data) {
-    // Allocate buffer for parsed data
-    int backspacesCounter = 0;
-    data.forEach((byte) {
-      if (byte == 8 || byte == 127) {
-        backspacesCounter++;
-      }
-    });
-    Uint8List buffer = Uint8List(data.length - backspacesCounter);
-    int bufferIndex = buffer.length;
-
-    // Apply backspace control character
-    backspacesCounter = 0;
-    for (int i = data.length - 1; i >= 0; i--) {
-      if (data[i] == 8 || data[i] == 127) {
-        backspacesCounter++;
-      } else {
-        if (backspacesCounter > 0) {
-          backspacesCounter--;
-        } else {
-          buffer[--bufferIndex] = data[i];
-        }
-      }
-    }
-
-    // Create message if there is new line character
-    String dataString = String.fromCharCodes(buffer);
-    int index = buffer.indexOf(13);
-    if (~index != 0) {
-      setState(() {
-        messages.add(
-          _Message(
-            1,
-            backspacesCounter > 0
-                ? _messageBuffer.substring(
-                0, _messageBuffer.length - backspacesCounter)
-                : _messageBuffer + dataString.substring(0, index),
-          ),
-        );
-        _messageBuffer = dataString.substring(index);
-      });
-    } else {
-      _messageBuffer = (backspacesCounter > 0
-          ? _messageBuffer.substring(
-          0, _messageBuffer.length - backspacesCounter)
-          : _messageBuffer + dataString);
-    }
-  }
 }
 
 class HomePage extends StatefulWidget {
@@ -373,9 +276,73 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<HomePage> {
+  //List<BluetoothDevice> devices;
+  BluetoothDevice pedalBoard;
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+  bool isConnecting = true;
+  bool get isConnected => connection != null && connection.isConnected;
+  bool isDisconnecting = false;
+
+
   @override
   void initState() {
     super.initState();
+
+    // Get current state
+    FlutterBluetoothSerial.instance.state.then((state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+
+    FlutterBluetoothSerial.instance
+        .getBondedDevices().then((List<BluetoothDevice> bondedDevices) {
+      setState(() {
+        print("Grabbed bonded devices");
+        for (var i = 0; i < bondedDevices.length; i++)
+        {
+          //print(bondedDevices[i].name);
+          if (bondedDevices[i].name == "HC-06")
+          {
+            pedalBoard = bondedDevices[i];
+
+            BluetoothConnection.toAddress(pedalBoard.address).then((_connection) {
+              print('Connected to the device');
+              connection = _connection;
+              setState(() {
+                isConnecting = false;
+                isDisconnecting = false;
+              });
+            }).catchError((error) {
+              print('Cannot connect, exception occurred');
+              print(error);
+            });
+            break;
+          }
+        }
+      });
+    });
+
+    Future.doWhile(() async {
+      // Wait if adapter not enabled
+      if (await FlutterBluetoothSerial.instance.isEnabled) {
+        return false;
+      }
+      await Future.delayed(Duration(milliseconds: 0xDD));
+      return true;
+    });
+
+    // Listen for further state changes
+    FlutterBluetoothSerial.instance
+        .onStateChanged()
+        .listen((BluetoothState state) {
+      setState(() {
+        _bluetoothState = state;
+
+        // Discoverable mode is disabled when Bluetooth gets disabled
+        //_discoverableTimeoutTimer = null;
+      });
+    });
   }
 
   // Function to let user re-order the enabled effects to get new sounds

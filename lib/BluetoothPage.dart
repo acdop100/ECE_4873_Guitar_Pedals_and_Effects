@@ -8,20 +8,17 @@ import 'BackgroundCollectingTask.dart';
 
 // import './helpers/LineChart.dart';
 
-class MainPage extends StatefulWidget {
+class BluetoothPage extends StatefulWidget {
   @override
-  _MainPage createState() => new _MainPage();
+  _BluetoothPage createState() => new _BluetoothPage();
 }
 
-class _MainPage extends State<MainPage> {
+class _BluetoothPage extends State<BluetoothPage> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   List<BluetoothDevice> devices;
   BluetoothDevice pedalBoard;
-  String _address = "...";
-  String _name = "...";
 
   Timer _discoverableTimeoutTimer;
-  int _discoverableTimeoutSecondsLeft = 0;
 
   BackgroundCollectingTask _collectingTask;
 
@@ -48,6 +45,7 @@ class _MainPage extends State<MainPage> {
               if (devices[i].name == "HC-06")
                 {
                   pedalBoard = devices[i];
+                  print("Device connected");
                 }
             }
         });
@@ -70,7 +68,6 @@ class _MainPage extends State<MainPage> {
 
         // Discoverable mode is disabled when Bluetooth gets disabled
         _discoverableTimeoutTimer = null;
-        _discoverableTimeoutSecondsLeft = 0;
       });
     });
   }
