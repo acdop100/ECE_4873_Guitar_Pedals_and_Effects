@@ -140,7 +140,7 @@ class _Message {
 // Builds the effect rows
 class _ListViewCard extends State<ListViewCard> {
   List<_Message> messages = List<_Message>();
-  String _messageBuffer = '';
+  //String _messageBuffer = '';
   @override
   void initState() {
     super.initState();
@@ -167,9 +167,13 @@ class _ListViewCard extends State<ListViewCard> {
                   if (value != null) {
                     widget.listItems[widget.index].effectValue = value;
                     _sendMessage('3');
-                    _sendMessage(widget.index.toString());
-                    // TO-DO: Manage different parameters for each effect
+                    _sendMessage((widget.index + 1).toString());
+                    // TO-DO: choose which parameter to edit
                     _sendMessage('1');
+                    // TO-DO: dictate whether going up or down
+                    _sendMessage('p');
+                    // Tell board we are done editing
+                    _sendMessage('z');
                   }
                 });
               },
@@ -219,11 +223,11 @@ class _ListViewCard extends State<ListViewCard> {
                   if (widget.listItems[widget.index].enabled == 1) {
                     widget.listItems[widget.index].enabled = 0;
                     _sendMessage('1');
-                    _sendMessage(widget.index.toString());
+                    _sendMessage((widget.index + 1).toString());
                   } else {
                     widget.listItems[widget.index].enabled = 1;
                     _sendMessage('1');
-                    _sendMessage(widget.index.toString());
+                    _sendMessage((widget.index + 1).toString());
                   }
                 });
               },
@@ -278,7 +282,7 @@ class HomePage extends StatefulWidget {
 class _HomePage extends State<HomePage> {
   //List<BluetoothDevice> devices;
   BluetoothDevice pedalBoard;
-  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+  //BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   bool isConnecting = true;
   bool get isConnected => connection != null && connection.isConnected;
   bool isDisconnecting = false;
@@ -291,7 +295,7 @@ class _HomePage extends State<HomePage> {
     // Get current state
     FlutterBluetoothSerial.instance.state.then((state) {
       setState(() {
-        _bluetoothState = state;
+        //_bluetoothState = state;
       });
     });
 
