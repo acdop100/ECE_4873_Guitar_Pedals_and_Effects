@@ -63,7 +63,9 @@ class _EffectSettings1 extends State<EffectSettings1> {
               onPressed: () {
                 if (widget.value[0] > 0)
                 {
+                  _sendMessage('1');
                   _sendMessage('m');
+
                   widget.value[0] = widget.value[0] - 5;
                   _setValue(widget.value[0], 0);
                 }
@@ -76,7 +78,9 @@ class _EffectSettings1 extends State<EffectSettings1> {
               onPressed: () {
                 if (widget.value[0] < 100)
                 {
+                  _sendMessage('1');
                   _sendMessage('p');
+
                   widget.value[0] = widget.value[0] + 5;
                   _setValue(widget.value[0], 0);
                 }
@@ -99,7 +103,9 @@ mainAxisSize:MainAxisSize.max,
               onPressed: () {
                 if (widget.value[1] > 0)
                 {
+                  _sendMessage('2');
                   _sendMessage('m');
+
                   widget.value[1] = widget.value[1] - 5;
                   _setValue(widget.value[1], 1);
                 }
@@ -112,7 +118,9 @@ mainAxisSize:MainAxisSize.max,
               onPressed: () {
                 if (widget.value[1] < 100)
                 {
+                  _sendMessage('2');
                   _sendMessage('p');
+
                   widget.value[1] = widget.value[1] + 5;
                   _setValue(widget.value[1], 1);
                 }
@@ -135,7 +143,9 @@ mainAxisSize:MainAxisSize.max,
               onPressed: () {
                 if (widget.value[2] > 0)
                 {
+                  _sendMessage('3');
                   _sendMessage('m');
+                  _sendMessage('z');
                   widget.value[2] = widget.value[2] - 5;
                   _setValue(widget.value[2], 2);
                 }
@@ -148,7 +158,9 @@ mainAxisSize:MainAxisSize.max,
               onPressed: () {
                 if (widget.value[2] < 100)
                 {
+                  _sendMessage('3');
                   _sendMessage('p');
+                  _sendMessage('z');
                   widget.value[2] = widget.value[2] + 5;
                   _setValue(widget.value[2], 2);
                 }
@@ -165,7 +177,7 @@ mainAxisSize:MainAxisSize.max,
               textColor: Colors.white,
               child: Text('Apply'),
               onPressed: () {
-                _sendMessage('z');
+                _sendMessage('x');
                 Navigator.pop(context, widget.value);
               },
             ),
@@ -242,6 +254,7 @@ class _EffectSettings2 extends State<EffectSettings2> {
               child: Text('Apply'),
               onPressed: () {
                 _sendMessage('z');
+                _sendMessage('x');
                 Navigator.pop(context, widget.value);
               },
             ),
@@ -293,7 +306,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[0] > 0)
                 {
+                  _sendMessage('1');
                   _sendMessage('m');
+                  _sendMessage('z');
                   widget.value[0] = widget.value[0] - 5;
                   _setValue(widget.value[0], 0);
                 }
@@ -306,7 +321,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[0] < 100)
                 {
+                  _sendMessage('1');
                   _sendMessage('p');
+                  _sendMessage('z');
                   widget.value[0] = widget.value[0] + 5;
                   _setValue(widget.value[0], 0);
                 }
@@ -328,7 +345,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[1] > 0)
                 {
+                  _sendMessage('2');
                   _sendMessage('m');
+                  _sendMessage('z');
                   widget.value[1] = widget.value[1] - 5;
                   _setValue(widget.value[1], 1);
                 }
@@ -341,7 +360,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[1] < 100)
                 {
+                  _sendMessage('2');
                   _sendMessage('p');
+                  _sendMessage('z');
                   widget.value[1] = widget.value[1] + 5;
                   _setValue(widget.value[1], 1);
                 }
@@ -363,7 +384,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[2] > 0)
                 {
+                  _sendMessage('3');
                   _sendMessage('m');
+                  _sendMessage('z');
                   widget.value[2] = widget.value[2] - 5;
                   _setValue(widget.value[2], 2);
                 }
@@ -376,7 +399,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[2] < 100)
                 {
+                  _sendMessage('3');
                   _sendMessage('p');
+                  _sendMessage('z');
                   widget.value[2] = widget.value[2] + 5;
                   _setValue(widget.value[2], 2);
                 }
@@ -398,7 +423,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[3] > 0)
                 {
+                  _sendMessage('4');
                   _sendMessage('m');
+                  _sendMessage('z');
                   widget.value[3] = widget.value[3] - 5;
                   _setValue(widget.value[3], 3);
                 }
@@ -411,7 +438,9 @@ class _EffectSettings3 extends State<EffectSettings3> {
               onPressed: () {
                 if (widget.value[3] < 100)
                 {
+                  _sendMessage('4');
                   _sendMessage('p');
+                  _sendMessage('z');
                   widget.value[3] = widget.value[3] + 5;
                   _setValue(widget.value[3], 3);
                 }
@@ -428,7 +457,7 @@ class _EffectSettings3 extends State<EffectSettings3> {
               textColor: Colors.white,
               child: Text('Apply'),
               onPressed: () {
-                _sendMessage('z');
+                _sendMessage('x');
                 Navigator.pop(context, widget.value);
               },
             ),
@@ -527,8 +556,6 @@ class _ListViewCard extends State<ListViewCard> {
                 // Tell board we are about to edit the parameter
                 _sendMessage('3');
                 _sendMessage((widget.index + 1).toString());
-                // TO-DO: choose which parameter to edit
-                _sendMessage('1');
                 // Bring up settings page for that effect
                 showDialog(
                     context: context,
@@ -538,6 +565,7 @@ class _ListViewCard extends State<ListViewCard> {
                         return EffectSettings1(widget.listItems[widget.index].name,
                             widget.listItems[widget.index].effectValue);
                       } else if (widget.index == 1){
+                        _sendMessage('1');
                         return EffectSettings2(widget.listItems[widget.index].name,
                             widget.listItems[widget.index].effectValue);
                       } else {
