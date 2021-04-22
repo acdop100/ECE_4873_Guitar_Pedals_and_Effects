@@ -8,11 +8,11 @@ BluetoothConnection connection;
 
 List<Effect> effects = [flangerEff, distortionEff, reverbEff];
 
-Effect flangerEff = Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 0.0);
+Effect flangerEff = Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 30.0);
 
-Effect distortionEff = Effect(id: 1, name: 'Distortion', enabled: 0, effectValue: 0.0);
+Effect distortionEff = Effect(id: 1, name: 'Distortion', enabled: 0, effectValue: 30.0);
 
-Effect reverbEff = Effect(id: 2, name: 'reverb', enabled: 0, effectValue: 0.0);
+Effect reverbEff = Effect(id: 2, name: 'Reverb', enabled: 0, effectValue: 30.0);
 
 TextEditingController _effectName = TextEditingController();
 String codeDialog;
@@ -27,7 +27,7 @@ findNewPatchID() {
 // Show effect parameters that can be changed
 class EffectSettings extends StatefulWidget {
   final String recordObject;
-  double value = 0.0;
+  double value = 30.0;
   EffectSettings(this.recordObject, this.value);
 
   @override
@@ -35,8 +35,8 @@ class EffectSettings extends StatefulWidget {
 }
 
 class _EffectSettings extends State<EffectSettings> {
-  static const double minValue = 0;
-  static const double maxValue = 10;
+  //static const double minValue = 0;
+  //static const double maxValue = 10;
 
   void _setValue(double value) => setState(() => widget.value = value);
 
@@ -50,26 +50,40 @@ class _EffectSettings extends State<EffectSettings> {
       ),
       actions: <Widget>[
         // Effect intensity value
-        Slider(
-            value: widget.value,
-            onChanged: _setValue,
-            min: minValue,
-            max: maxValue),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        ButtonBar(
+          //mainAxisAlignment: MainAxisAlignment.center,
+          //crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             FlatButton(
               color: Colors.red,
               textColor: Colors.white,
-              child: Text('Cancel'),
+              child: Text('Decrease'),
               onPressed: () {
-                Navigator.pop(context);
+                if (widget.value > 0)
+                {
+                  _sendMessage('m');
+                  widget.value = widget.value - 5;
+                  _setValue(widget.value);
+                }
               },
             ),
             FlatButton(
               color: Colors.green,
               textColor: Colors.white,
-              child: Text('Save'),
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value < 100)
+                {
+                  _sendMessage('p');
+                  widget.value = widget.value + 5;
+                  _setValue(widget.value);
+                }
+              },
+            ),
+            FlatButton(
+              color: Color(0xff042082),
+              textColor: Colors.white,
+              child: Text('Back'),
               onPressed: () {
                 Navigator.pop(context, widget.value);
               },
@@ -157,6 +171,11 @@ class _ListViewCard extends State<ListViewCard> {
             // Tap dots to edit effect
             new GestureDetector(
               onTap: () {
+                // Tell board we are about to edit the parameter
+                _sendMessage('3');
+                _sendMessage((widget.index + 1).toString());
+                // TO-DO: choose which parameter to edit
+                _sendMessage('1');
                 // Bring up settings page for that effect
                 showDialog(
                     context: context,
@@ -165,17 +184,11 @@ class _ListViewCard extends State<ListViewCard> {
                           widget.listItems[widget.index].effectValue);
                     }).then((value) {
                   if (value != null) {
+                    // Assign value back to structure
                     widget.listItems[widget.index].effectValue = value;
-                    _sendMessage('3');
-                    _sendMessage((widget.index + 1).toString());
-                    // TO-DO: choose which parameter to edit
-                    _sendMessage('1');
-                    // TO-DO: dictate whether going up or down
-                    _sendMessage('p');
-                    // Tell board we are done editing
-                    _sendMessage('z');
                   }
                 });
+                _sendMessage('z');
               },
               child: new Container(
                 margin: const EdgeInsets.all(10.0),
@@ -256,22 +269,22 @@ class _ListViewCard extends State<ListViewCard> {
     );
   }
 
-  void _sendMessage(String text) async {
-    text = text.trim();
+  
 
-    if (text.length > 0) {
-      try {
-        connection.output.add(utf8.encode(text));
-        await connection.output.allSent;
-        print("Message sent");
-      } catch (e) {
-        print("Message send FAILED");
-        // Ignore error, but notify state
-        setState(() {});
-      }
+}
+
+void _sendMessage(String text) async {
+  text = text.trim();
+
+  if (text.length > 0) {
+    try {
+      connection.output.add(utf8.encode(text));
+      await connection.output.allSent;
+      print("Message sent");
+    } catch (e) {
+      print("Message send FAILED");
     }
   }
-
 }
 
 class HomePage extends StatefulWidget {
