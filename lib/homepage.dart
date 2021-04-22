@@ -85,6 +85,7 @@ class _EffectSettings extends State<EffectSettings> {
               textColor: Colors.white,
               child: Text('Back'),
               onPressed: () {
+                _sendMessage('z');
                 Navigator.pop(context, widget.value);
               },
             ),
@@ -188,7 +189,6 @@ class _ListViewCard extends State<ListViewCard> {
                     widget.listItems[widget.index].effectValue = value;
                   }
                 });
-                _sendMessage('z');
               },
               child: new Container(
                 margin: const EdgeInsets.all(10.0),
