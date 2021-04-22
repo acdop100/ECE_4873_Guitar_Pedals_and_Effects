@@ -1,69 +1,71 @@
+//import 'dart:html';
 import 'package:flutter/material.dart';
 import 'patchData.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert';
-import 'dart:typed_data';
+
 
 BluetoothConnection connection;
 
 List<Effect> effects = [flangerEff, distortionEff, reverbEff];
 
-Effect flangerEff = Effect(id: 0, name: 'Flanger', enabled: 0, effectValue: 30.0);
+Effect flangerEff = Effect(id: 0, name: 'Flanger', desc: "Offset, Depth, Freq Modulation", enabled: 0, effectValue: [30, 30, 30]);
 
-Effect distortionEff = Effect(id: 1, name: 'Distortion', enabled: 0, effectValue: 30.0);
+Effect distortionEff = Effect(id: 1, name: 'Distortion', desc: "Gain", enabled: 0, effectValue: [30, 30, 30]);
 
-Effect reverbEff = Effect(id: 2, name: 'Reverb', enabled: 0, effectValue: 30.0);
+Effect reverbEff = Effect(id: 2, name: 'Reverb', desc: "Dry, Wet, Roomsize, Damp", enabled: 0, effectValue: [30, 30, 30, 30]);
 
 TextEditingController _effectName = TextEditingController();
 String codeDialog;
 String valueText;
 
-// Assign the patch the next unused ID
-// (NOT IMPLEMENTED YET)
-findNewPatchID() {
-  return 1;
-}
 
 // Show effect parameters that can be changed
-class EffectSettings extends StatefulWidget {
+class EffectSettings1 extends StatefulWidget {
   final String recordObject;
-  double value = 30.0;
-  EffectSettings(this.recordObject, this.value);
+  List<int> value = [30, 30, 30];
+  EffectSettings1(this.recordObject, this.value);
 
   @override
-  _EffectSettings createState() => new _EffectSettings();
+  _EffectSettings1 createState() => new _EffectSettings1();
 }
 
-class _EffectSettings extends State<EffectSettings> {
+class _EffectSettings1 extends State<EffectSettings1> {
   //static const double minValue = 0;
   //static const double maxValue = 10;
 
-  void _setValue(double value) => setState(() => widget.value = value);
+  void _setValue(int value, int index) => setState(() => widget.value[index] = value);
 
   @override
   Widget build(BuildContext context) {
     // New window
     return AlertDialog(
       title: new Text('${widget.recordObject} Settings'),
-      content: new Text(
-        '${widget.recordObject} Power: ${widget.value.toStringAsFixed(1)}',
-      ),
       actions: <Widget>[
+        SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+        Text(
+          '${widget.recordObject} Power: ${widget.value[0].toStringAsFixed(1)}',
+          textAlign: TextAlign.center,
+        ),
         // Effect intensity value
         ButtonBar(
-          //mainAxisAlignment: MainAxisAlignment.center,
-          //crossAxisAlignment: CrossAxisAlignment.center,
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
           children: [
             FlatButton(
               color: Colors.red,
               textColor: Colors.white,
               child: Text('Decrease'),
               onPressed: () {
-                if (widget.value > 0)
+                if (widget.value[0] > 0)
                 {
                   _sendMessage('m');
-                  widget.value = widget.value - 5;
-                  _setValue(widget.value);
+                  widget.value[0] = widget.value[0] - 5;
+                  _setValue(widget.value[0], 0);
                 }
               },
             ),
@@ -72,25 +74,366 @@ class _EffectSettings extends State<EffectSettings> {
               textColor: Colors.white,
               child: Text('Increase'),
               onPressed: () {
-                if (widget.value < 100)
+                if (widget.value[0] < 100)
                 {
                   _sendMessage('p');
-                  widget.value = widget.value + 5;
-                  _setValue(widget.value);
+                  widget.value[0] = widget.value[0] + 5;
+                  _setValue(widget.value[0], 0);
+                }
+              },
+            ),
+          ],
+        ),
+        Text(
+          '${widget.recordObject} Depth: ${widget.value[1].toStringAsFixed(1)}',
+          textAlign: TextAlign.center,
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[1] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[1] = widget.value[1] - 5;
+                  _setValue(widget.value[1], 1);
                 }
               },
             ),
             FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[1] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[1] = widget.value[1] + 5;
+                  _setValue(widget.value[1], 1);
+                }
+              },
+            ),
+          ],
+        ),
+        new Text(
+          '${widget.recordObject} Frequency Modulation: ${widget.value[2].toStringAsFixed(1)}',
+          textAlign: TextAlign.center,
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[2] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[2] = widget.value[2] - 5;
+                  _setValue(widget.value[2], 2);
+                }
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[2] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[2] = widget.value[2] + 5;
+                  _setValue(widget.value[2], 2);
+                }
+              },
+            ),
+          ],
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
               color: Color(0xff042082),
               textColor: Colors.white,
-              child: Text('Back'),
+              child: Text('Apply'),
               onPressed: () {
                 _sendMessage('z');
                 Navigator.pop(context, widget.value);
               },
             ),
           ],
-        )
+        )]))
+      ],
+    );
+  }
+}
+
+class EffectSettings2 extends StatefulWidget {
+  final String recordObject;
+  List<int> value = [30];
+  EffectSettings2(this.recordObject, this.value);
+
+  @override
+  _EffectSettings2 createState() => new _EffectSettings2();
+}
+
+class _EffectSettings2 extends State<EffectSettings2> {
+  //static const double minValue = 0;
+  //static const double maxValue = 10;
+
+  void _setValue(int value) => setState(() => widget.value[0] = value);
+
+  @override
+  Widget build(BuildContext context) {
+    // New window
+    return AlertDialog(
+      title: new Text('${widget.recordObject} Settings'),
+      actions: <Widget>[
+    SizedBox(
+    width: MediaQuery.of(context).size.width,
+    child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+        // Effect intensity value
+      new Text(
+        '${widget.recordObject} Amp Gain: ${widget.value[0].toStringAsFixed(1)}',
+      ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[0] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[0] = widget.value[0] - 5;
+                  _setValue(widget.value[0]);
+                }
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[0] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[0] = widget.value[0] + 5;
+                  _setValue(widget.value[0]);
+                }
+              },
+            ),
+            FlatButton(
+              color: Color(0xff042082),
+              textColor: Colors.white,
+              child: Text('Apply'),
+              onPressed: () {
+                _sendMessage('z');
+                Navigator.pop(context, widget.value);
+              },
+            ),
+          ],
+        )]))
+      ],
+    );
+  }
+}
+
+class EffectSettings3 extends StatefulWidget {
+  final String recordObject;
+  List<int> value = [30, 30, 30, 30];
+  EffectSettings3(this.recordObject, this.value);
+
+  @override
+  _EffectSettings3 createState() => new _EffectSettings3();
+}
+
+class _EffectSettings3 extends State<EffectSettings3> {
+  //static const double minValue = 0;
+  //static const double maxValue = 10;
+
+  void _setValue(int value, int index) => setState(() => widget.value[index] = value);
+
+  @override
+  Widget build(BuildContext context) {
+    // New window
+    return AlertDialog(
+      title: new Text('${widget.recordObject} Settings'),
+      actions: <Widget>[
+    SizedBox(
+    width: MediaQuery.of(context).size.width,
+    child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+        new Text(
+          '${widget.recordObject} Dryness: ${widget.value[0].toStringAsFixed(1)}',
+        ),
+        // Effect intensity value
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[0] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[0] = widget.value[0] - 5;
+                  _setValue(widget.value[0], 0);
+                }
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[0] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[0] = widget.value[0] + 5;
+                  _setValue(widget.value[0], 0);
+                }
+              },
+            ),
+          ],
+        ),
+        new Text(
+          '${widget.recordObject} Wetness: ${widget.value[1].toStringAsFixed(1)}',
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[1] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[1] = widget.value[1] - 5;
+                  _setValue(widget.value[1], 1);
+                }
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[1] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[1] = widget.value[1] + 5;
+                  _setValue(widget.value[1], 1);
+                }
+              },
+            ),
+          ],
+        ),
+        new Text(
+          '${widget.recordObject} Roomsize: ${widget.value[2].toStringAsFixed(1)}',
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[2] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[2] = widget.value[2] - 5;
+                  _setValue(widget.value[2], 2);
+                }
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[2] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[2] = widget.value[2] + 5;
+                  _setValue(widget.value[2], 2);
+                }
+              },
+            ),
+          ],
+        ),
+        new Text(
+          '${widget.recordObject} Damping: ${widget.value[3].toStringAsFixed(1)}',
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Colors.red,
+              textColor: Colors.white,
+              child: Text('Decrease'),
+              onPressed: () {
+                if (widget.value[3] > 0)
+                {
+                  _sendMessage('m');
+                  widget.value[3] = widget.value[3] - 5;
+                  _setValue(widget.value[3], 3);
+                }
+              },
+            ),
+            FlatButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              child: Text('Increase'),
+              onPressed: () {
+                if (widget.value[3] < 100)
+                {
+                  _sendMessage('p');
+                  widget.value[3] = widget.value[3] + 5;
+                  _setValue(widget.value[3], 3);
+                }
+              },
+            ),
+          ],
+        ),
+        ButtonBar(
+          alignment:MainAxisAlignment.center,
+          mainAxisSize:MainAxisSize.max,
+          children: [
+            FlatButton(
+              color: Color(0xff042082),
+              textColor: Colors.white,
+              child: Text('Apply'),
+              onPressed: () {
+                _sendMessage('z');
+                Navigator.pop(context, widget.value);
+              },
+            ),
+          ],
+        )]))
       ],
     );
   }
@@ -105,28 +448,37 @@ _saveEffect(BuildContext context) {
             content: TextField(
               onChanged: (value) {},
               controller: _effectName,
-              decoration: InputDecoration(hintText: "Name of patch"),
+              decoration: InputDecoration(hintText: "Choose which state to overwrite"),
             ),
             actions: <Widget>[
               FlatButton(
-                color: Colors.red,
+                color: Color(0xff042082),
                 textColor: Colors.white,
-                child: Text('Cancel'),
+                child: Text('1'),
                 onPressed: () {
                   Navigator.pop(context);
+                  _sendMessage('4');
+                  _sendMessage('1');
                 },
               ),
               FlatButton(
-                color: Colors.green,
+                color: Color(0xff042082),
                 textColor: Colors.white,
-                child: Text('Save'),
+                child: Text('2'),
                 onPressed: () {
-                  Patch patchToSave = new Patch(
-                      id: findNewPatchID(),
-                      name: _effectName.value.toString(),
-                      effects: effects);
-                  insertPatch(patchToSave);
                   Navigator.pop(context);
+                  _sendMessage('4');
+                  _sendMessage('2');
+                },
+              ),
+              FlatButton(
+                color: Color(0xff042082),
+                textColor: Colors.white,
+                child: Text('3'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _sendMessage('4');
+                  _sendMessage('3');
                 },
               ),
             ],
@@ -181,8 +533,17 @@ class _ListViewCard extends State<ListViewCard> {
                 showDialog(
                     context: context,
                     builder: (_) {
-                      return EffectSettings(widget.listItems[widget.index].name,
-                          widget.listItems[widget.index].effectValue);
+                      if (widget.index == 0)
+                      {
+                        return EffectSettings1(widget.listItems[widget.index].name,
+                            widget.listItems[widget.index].effectValue);
+                      } else if (widget.index == 1){
+                        return EffectSettings2(widget.listItems[widget.index].name,
+                            widget.listItems[widget.index].effectValue);
+                      } else {
+                      return EffectSettings3(widget.listItems[widget.index].name,
+                      widget.listItems[widget.index].effectValue);
+                      }
                     }).then((value) {
                   if (value != null) {
                     // Assign value back to structure
@@ -219,7 +580,7 @@ class _ListViewCard extends State<ListViewCard> {
                     padding: const EdgeInsets.all(8.0),
                     alignment: Alignment.topLeft,
                     child: Text(
-                      '${widget.listItems[widget.index].name}',
+                      '${widget.listItems[widget.index].desc}',
                       style: TextStyle(
                           fontWeight: FontWeight.normal, fontSize: 16),
                       textAlign: TextAlign.left,
@@ -251,26 +612,14 @@ class _ListViewCard extends State<ListViewCard> {
                         ? Icons.check_box
                         : Icons.check_box_outline_blank,
                     //color: Colors.red,
-                    size: 30.0,
+                    size: 30,
                   )),
             ),
-            // Users press this to re-order items
-            /*Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-              child: Icon(
-                Icons.reorder,
-                color: Colors.grey,
-                size: 24.0,
-              ),
-            ),*/
           ],
         ),
       ),
     );
   }
-
-  
-
 }
 
 void _sendMessage(String text) async {
@@ -362,19 +711,6 @@ class _HomePage extends State<HomePage> {
     });
   }
 
-  // Function to let user re-order the enabled effects to get new sounds
-  void _onReorder(int oldIndex, int newIndex) {
-    setState(
-      () {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        final Effect item = effects.removeAt(oldIndex);
-        effects.insert(newIndex, item);
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -385,6 +721,60 @@ class _HomePage extends State<HomePage> {
           ),
           backgroundColor: Color(0xff042082),
           actions: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(right: 3.0),
+              child: GestureDetector(
+                onTap: () {
+                  // New pop-up to save patch
+                  _sendMessage('5');
+                  _sendMessage('1');
+                },
+                child: new Container(
+                  margin: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.looks_one_rounded,
+                    color: Colors.white,
+                    size: 24.0,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 3.0),
+              child: GestureDetector(
+                onTap: () {
+                  // New pop-up to save patch
+                  _sendMessage('5');
+                  _sendMessage('2');
+                },
+                child: new Container(
+                  margin: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.looks_two_rounded,
+                    color: Colors.white,
+                    size: 24.0,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 3.0),
+              child: GestureDetector(
+                onTap: () {
+                  // New pop-up to save patch
+                  _sendMessage('5');
+                  _sendMessage('3');
+                },
+                child: new Container(
+                  margin: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.looks_3_rounded,
+                    color: Colors.white,
+                    size: 24.0,
+                  ),
+                ),
+              ),
+            ),
             Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: GestureDetector(
@@ -405,20 +795,42 @@ class _HomePage extends State<HomePage> {
           ],
         ),
         // Body of the page to list effects.
-        body: ReorderableListView(
-          onReorder: _onReorder,
-          scrollDirection: Axis.vertical,
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: List.generate(
-            effects.length,
-            (index) {
-              return ListViewCard(
-                effects,
-                index,
-                Key('$index'),
-              );
-            },
-          ),
-        ));
+        body: Column (
+            mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(
+              child: ListView(
+                scrollDirection: Axis.vertical,
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  children: List.generate(
+                    effects.length,
+                        (index) {
+                      return ListViewCard(
+                        effects,
+                        index,
+                        Key('$index'),
+                      );
+                    },
+                  ),
+                ),
+            ),
+            FlatButton(
+              padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 60.0),
+              color: Color(0xff042082),
+              textColor: Colors.white,
+              child: Text('Bypass'),
+              onPressed: () {
+                setState(() {
+                  _sendMessage('6');
+                });
+              },
+            ),
+            new Divider(
+              thickness: 0,
+              color: Colors.white,
+            ),
+          ]),
+        );
+
   }
 }
